@@ -7,6 +7,8 @@ import 'pages/change_password_page.dart';
 import 'pages/cart_page.dart';
 import 'pages/home_page.dart';
 import 'pages/list_chat.dart';
+import 'pages/edit_profile_page.dart';
+import 'pages/checkout_history_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -41,6 +43,12 @@ class MyApp extends StatelessWidget {
 
         'ListChatPage': (context) =>
             const ListChatPage(),
+
+        'EditProfilePage': (context) =>
+            const EditProfilePage(),
+
+        'CheckoutHistoryPage': (context) =>
+            const CheckoutHistoryPage(),
       },
     );
   }

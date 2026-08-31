@@ -137,6 +137,9 @@ class _RegisterPageState
       return;
     }
 
+    final username =
+        _nameController.text;
+
     final email =
         _emailController.text.trim();
 
@@ -145,6 +148,7 @@ class _RegisterPageState
 
     final success =
         AuthService.register(
+      username,
       email,
       password,
     );

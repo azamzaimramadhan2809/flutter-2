@@ -1,16 +1,27 @@
 import 'package:flutter/material.dart';
 
-class AccountPage extends StatelessWidget {
+import '../models/user_model.dart';
+import '../services/auth_service.dart';
+import 'edit_profile_page.dart';
+
+class AccountPage extends StatefulWidget {
   const AccountPage({super.key});
 
   @override
+  State<AccountPage> createState() => _AccountPageState();
+}
+
+class _AccountPageState extends State<AccountPage> {
+  @override
   Widget build(BuildContext context) {
+    final AppUser? user = AuthService.currentUser;
+
     return Scaffold(
-      backgroundColor: Color(0xFFF7F8FA),
+      backgroundColor: const Color(0xFFF7F8FA),
 
       appBar: AppBar(
-        title: Text(
-          'Account Page',
+        title: const Text(
+          'Account',
           style: TextStyle(
             color: Color(0xFF1F2937),
             fontWeight: FontWeight.w600,
@@ -20,26 +31,28 @@ class AccountPage extends StatelessWidget {
         backgroundColor: Colors.white,
         elevation: 0.5,
 
-        iconTheme: IconThemeData(
+        iconTheme: const IconThemeData(
           color: Color(0xFF1E3A5F),
         ),
       ),
 
       body: SingleChildScrollView(
         child: Padding(
-          padding: EdgeInsets.symmetric(
+          padding: const EdgeInsets.symmetric(
             horizontal: 16.0,
           ),
 
           child: Column(
             children: [
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
 
-              _buildProfileSection(),
+              _buildProfileSection(context, user),
 
-              SizedBox(height: 30),
+              const SizedBox(height: 30),
 
               _buildSettingsSection(context),
+
+              const SizedBox(height: 20),
             ],
           ),
         ),
@@ -51,10 +64,10 @@ class AccountPage extends StatelessWidget {
   ===== PROFILE SECTION =========
   =============================*/
 
-  Widget _buildProfileSection() {
+  Widget _buildProfileSection(BuildContext context, AppUser? user) {
     return Container(
       decoration: BoxDecoration(
-        gradient: LinearGradient(
+        gradient: const LinearGradient(
           colors: [
             Color(0xFF1E3A5F),
             Color(0xFF4F6D8A),
@@ -64,52 +77,99 @@ class AccountPage extends StatelessWidget {
           end: Alignment.bottomRight,
         ),
 
-        borderRadius: BorderRadius.all(
-          Radius.circular(15),
-        ),
+        borderRadius: BorderRadius.circular(15),
       ),
 
-      padding: EdgeInsets.symmetric(
-        vertical: 40,
+      padding: const EdgeInsets.symmetric(
+        vertical: 30,
         horizontal: 16,
       ),
 
-      child: Row(
+      child: Column(
         children: [
-          ClipOval(
-            child: Image.asset(
-              'assets/images/A.png',
-              width: 100,
-              height: 100,
-              fit: BoxFit.cover,
-            ),
-          ),
-
-          SizedBox(width: 20),
-
-          Column(
-            crossAxisAlignment:
-                CrossAxisAlignment.start,
-
+          Row(
             children: [
-              Text(
-                "Azam Za'im Ramadhan",
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
+              CircleAvatar(
+                radius: 45,
+                backgroundColor: Colors.white24,
+
+                backgroundImage: user?.photoBytes != null
+                    ? MemoryImage(user!.photoBytes!)
+                    : null,
+
+                child: user?.photoBytes == null
+                    ? const Icon(
+                        Icons.person,
+                        size: 45,
+                        color: Colors.white,
+                      )
+                    : null,
               ),
 
-              SizedBox(height: 5),
+              const SizedBox(width: 20),
 
-              Text(
-                'azamzaimramadhan.17@gmail.com',
-                style: TextStyle(
-                  color: Colors.white70,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+
+                  children: [
+                    Text(
+                      user?.username ?? 'Guest',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+
+                    const SizedBox(height: 5),
+
+                    Text(
+                      user?.email ?? '-',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: Colors.white70,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
+          ),
+
+          const SizedBox(height: 20),
+
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton(
+              onPressed: () async {
+                await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const EditProfilePage(),
+                  ),
+                );
+
+                setState(() {});
+              },
+
+              style: OutlinedButton.styleFrom(
+                foregroundColor: Colors.white,
+                side: const BorderSide(color: Colors.white70),
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+
+              child: const Text(
+                'Edit Profile',
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
+            ),
           ),
         ],
       ),
@@ -131,14 +191,14 @@ class AccountPage extends StatelessWidget {
 
       color: Colors.white,
 
-      margin: EdgeInsets.symmetric(
-        vertical: 10,
+      margin: const EdgeInsets.only(
+        bottom: 10,
       ),
 
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(15),
 
-        side: BorderSide(
+        side: const BorderSide(
           color: Color(0xFFE5E7EB),
         ),
       ),
@@ -146,20 +206,20 @@ class AccountPage extends StatelessWidget {
       child: ListTile(
         leading: Icon(
           icon,
-          color: Color(0xFF1E3A5F),
-          size: 28,
+          color: const Color(0xFF1E3A5F),
+          size: 26,
         ),
 
         title: Text(
           title,
-          style: TextStyle(
-            fontSize: 18,
+          style: const TextStyle(
+            fontSize: 16,
             fontWeight: FontWeight.w500,
             color: Color(0xFF1F2937),
           ),
         ),
 
-        trailing: Icon(
+        trailing: const Icon(
           Icons.arrow_forward_ios,
           color: Color(0xFF9CA3AF),
           size: 16,
@@ -174,20 +234,22 @@ class AccountPage extends StatelessWidget {
   ======= SETTING SECTION =======
   =============================*/
 
-  Widget _buildSettingsSection(
-    BuildContext context,
-  ) {
+  Widget _buildSettingsSection(BuildContext context) {
     return Column(
       children: [
         _buildSettingItem(
           context,
           icon: Icons.person_outline,
-          title: 'Profile',
-          onTap: () {
-            Navigator.pushNamed(
+          title: 'Personal Information',
+          onTap: () async {
+            await Navigator.push(
               context,
-              'AccountPage',
+              MaterialPageRoute(
+                builder: (_) => const EditProfilePage(),
+              ),
             );
+
+            setState(() {});
           },
         ),
 
@@ -205,27 +267,17 @@ class AccountPage extends StatelessWidget {
 
         _buildSettingItem(
           context,
-          icon: Icons.notifications_outlined,
-          title: 'Notifications',
+          icon: Icons.receipt_long_outlined,
+          title: 'Checkout History',
           onTap: () {
             Navigator.pushNamed(
               context,
-              'Notifications',
+              'CheckoutHistoryPage',
             );
           },
         ),
 
-        _buildSettingItem(
-          context,
-          icon: Icons.help_outline,
-          title: 'Help & Support',
-          onTap: () {
-            Navigator.pushNamed(
-              context,
-              'Help',
-            );
-          },
-        ),
+        const SizedBox(height: 10),
 
         _buildSettingItem(
           context,
@@ -239,35 +291,33 @@ class AccountPage extends StatelessWidget {
     );
   }
 
-  void _showLogoutDialog(
-    BuildContext context,
-  ) {
+  void _showLogoutDialog(BuildContext context) {
     showDialog(
       context: context,
 
-      builder: (context) {
+      builder: (dialogContext) {
         return AlertDialog(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
           ),
 
-          title: Text(
+          title: const Text(
             'Logout',
             style: TextStyle(
               fontWeight: FontWeight.bold,
             ),
           ),
 
-          content: Text(
+          content: const Text(
             'Are you sure you want to logout?',
           ),
 
           actions: [
             TextButton(
-              onPressed:
-                  Navigator.of(context).pop,
+              onPressed: () =>
+                  Navigator.of(dialogContext).pop(),
 
-              child: Text(
+              child: const Text(
                 'Cancel',
                 style: TextStyle(
                   color: Color(0xFF6B7280),
@@ -277,25 +327,29 @@ class AccountPage extends StatelessWidget {
 
             ElevatedButton(
               onPressed: () {
-                Navigator.of(context).pop();
+                Navigator.of(dialogContext).pop();
 
-                Navigator.pushNamed(
-                  context,
+                // Hapus session login
+                AuthService.logout();
+
+                // Kembali ke LoginPage dan hapus semua history
+                // navigasi sebelumnya, supaya tombol back
+                // tidak bisa masuk ke Home tanpa login lagi
+                Navigator.of(context).pushNamedAndRemoveUntil(
                   'LoginPage',
+                  (route) => false,
                 );
               },
 
               style: ElevatedButton.styleFrom(
-                backgroundColor:
-                    Color(0xFF1E3A5F),
+                backgroundColor: const Color(0xFF1E3A5F),
 
                 shape: RoundedRectangleBorder(
-                  borderRadius:
-                      BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(10),
                 ),
               ),
 
-              child: Text(
+              child: const Text(
                 'Logout',
                 style: TextStyle(
                   fontWeight: FontWeight.bold,

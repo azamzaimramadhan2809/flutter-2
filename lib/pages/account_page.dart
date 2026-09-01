@@ -239,22 +239,6 @@ class _AccountPageState extends State<AccountPage> {
       children: [
         _buildSettingItem(
           context,
-          icon: Icons.person_outline,
-          title: 'Personal Information',
-          onTap: () async {
-            await Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => const EditProfilePage(),
-              ),
-            );
-
-            setState(() {});
-          },
-        ),
-
-        _buildSettingItem(
-          context,
           icon: Icons.lock_outline,
           title: 'Change Password',
           onTap: () {

@@ -21,7 +21,7 @@ class HomeAppBar extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(left: 20),
             child: Text(
-              "Appointments",
+              "GameShop",
               style: TextStyle(
                 fontSize: 23,
                 fontWeight: FontWeight.bold,

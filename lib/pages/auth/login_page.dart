@@ -209,7 +209,7 @@ class _LoginPageState
                     ),
 
                     const Text(
-                      'ShopEase',
+                      'GameShop',
 
                       style: TextStyle(
                         fontSize: 24,

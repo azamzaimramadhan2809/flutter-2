@@ -34,6 +34,11 @@ class OrderService {
 
     _orders.add(order);
 
+    // ignore: avoid_print
+    print(
+      'ORDER SAVED -> id: ${order.id}, user: ${order.userEmail}, total: ${order.total}, totalOrdersNow: ${_orders.length}',
+    );
+
     return order;
   }
 
@@ -48,7 +53,11 @@ class OrderService {
         .where((order) => order.userEmail == normalizedEmail)
         .toList();
 
-    // Terbaru ditampilkan di atas
+    // ignore: avoid_print
+    print(
+      'FETCHING HISTORY -> for: $normalizedEmail, found: ${result.length} (total in store: ${_orders.length})',
+    );
+
     return result.reversed.toList();
   }
 }

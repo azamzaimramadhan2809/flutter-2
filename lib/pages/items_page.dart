@@ -21,6 +21,7 @@ class ItemsPage extends StatefulWidget {
 
 class _ItemsPageState extends State<ItemsPage> {
   int quantity = 1;
+  bool isFavorite = false;
 
   double get price => widget.price;
 
@@ -138,13 +139,76 @@ class _ItemsPageState extends State<ItemsPage> {
 
                   const Spacer(),
 
-                  IconButton(
-                    onPressed: () {},
-
-                    icon: const Icon(
-                      Icons.favorite_border,
-                      size: 26,
-                      color: Color(0xFF1E3A5F),
+                  Container(
+                    margin: const EdgeInsets.only(right: 10),
+                    width: 45,
+                    height: 45,
+                  
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                  
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.08),
+                          blurRadius: 10,
+                          offset: const Offset(0, 3),
+                        ),
+                      ],
+                    ),
+                  
+                    child: IconButton(
+                      padding: EdgeInsets.zero,
+                  
+                      onPressed: () {
+                        setState(() {
+                          isFavorite = !isFavorite;
+                        });
+                  
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              isFavorite
+                                  ? '${widget.productName} added to favorites'
+                                  : '${widget.productName} removed from favorites',
+                            ),
+                            duration: const Duration(seconds: 1),
+                            behavior: SnackBarBehavior.floating,
+                            margin: const EdgeInsets.all(16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        );
+                      },
+                  
+                      icon: AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 250),
+                  
+                        transitionBuilder: (
+                          Widget child,
+                          Animation<double> animation,
+                        ) {
+                          return ScaleTransition(
+                            scale: animation,
+                            child: child,
+                          );
+                        },
+                  
+                        child: Icon(
+                          isFavorite
+                              ? Icons.favorite
+                              : Icons.favorite_border,
+                  
+                          key: ValueKey<bool>(isFavorite),
+                  
+                          size: 25,
+                  
+                          color: isFavorite
+                              ? Colors.red
+                              : const Color(0xFF1E3A5F),
+                        ),
+                      ),
                     ),
                   ),
                 ],

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../models/cart_item.dart';
 import '../models/cart_controller.dart';
+import '../services/auth_service.dart';
+import '../services/order_service.dart';
 
 class CheckoutPage extends StatefulWidget {
   final List<CartItem> cartItems;
@@ -59,7 +61,25 @@ class _CheckoutPageState
   void placeOrder() {
     if (!_formKey.currentState!
         .validate()) {
+      // ignore: avoid_print
+      print('PLACE ORDER GAGAL: form validation failed (misal alamat kosong)');
       return;
+    }
+
+    final currentUser = AuthService.currentUser;
+
+    // ignore: avoid_print
+    print('PLACE ORDER DIPANGGIL. currentUser = ${currentUser?.email}');
+
+    if (currentUser == null) {
+      // ignore: avoid_print
+      print('PLACE ORDER GAGAL: currentUser NULL, order TIDAK disimpan.');
+    } else {
+      OrderService.placeOrder(
+        userEmail: currentUser.email,
+        items: widget.cartItems,
+        total: total,
+      );
     }
 
     showDialog(
@@ -152,10 +172,6 @@ class _CheckoutPageState
                   CrossAxisAlignment.start,
 
               children: [
-                // ==================================================
-                // ORDER SUMMARY
-                // ==================================================
-
                 const Text(
                   'Order Summary',
 
@@ -181,7 +197,6 @@ class _CheckoutPageState
                   height: 20,
                 ),
 
-                // TOTAL
                 Container(
                   padding:
                       const EdgeInsets.all(
@@ -247,10 +262,6 @@ class _CheckoutPageState
                 const SizedBox(
                   height: 28,
                 ),
-
-                // ==================================================
-                // SHIPPING ADDRESS
-                // ==================================================
 
                 const Text(
                   'Shipping Address',
@@ -323,10 +334,6 @@ class _CheckoutPageState
                   height: 28,
                 ),
 
-                // ==================================================
-                // PAYMENT
-                // ==================================================
-
                 const Text(
                   'Payment Method',
 
@@ -358,10 +365,6 @@ class _CheckoutPageState
                 const SizedBox(
                   height: 30,
                 ),
-
-                // ==================================================
-                // PLACE ORDER
-                // ==================================================
 
                 SizedBox(
                   width:
@@ -414,10 +417,6 @@ class _CheckoutPageState
       ),
     );
   }
-
-  // ============================================================
-  // ORDER ITEM
-  // ============================================================
 
   Widget buildOrderItem(
     CartItem item,
@@ -498,10 +497,6 @@ class _CheckoutPageState
       ),
     );
   }
-
-  // ============================================================
-  // PAYMENT OPTION
-  // ============================================================
 
   Widget paymentOption(
     String value,

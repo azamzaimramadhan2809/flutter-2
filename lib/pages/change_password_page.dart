@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../services/auth_service.dart';
+
 class ChangePasswordPage extends StatefulWidget {
   const ChangePasswordPage({super.key});
 
@@ -13,8 +15,6 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
   final _newPassController = TextEditingController();
   final _confirmPassController = TextEditingController();
 
-  String oldPassword = 'admin';
-
   bool _obscureOld = true;
   bool _obscureNew = true;
   bool _obscureConfirm = true;
@@ -25,6 +25,14 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
   static const Color accentColor = Color(0xFF4A4A8A);
   static const Color softPurple = Color(0xFF6C63FF);
   static const Color lightBg = Color(0xFFF5F5FA);
+
+  @override
+  void dispose() {
+    _oldPassController.dispose();
+    _newPassController.dispose();
+    _confirmPassController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -220,8 +228,11 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
             if (value == null || value.isEmpty) {
               return 'Password lama tidak boleh kosong';
             }
-            if (value != oldPassword) {
-              return 'Password lama salah';
+            // Bandingkan langsung dengan password akun yang SEDANG LOGIN,
+            // bukan dengan variabel lokal. Ini sumber kebenaran satu-satunya.
+            final currentUser = AuthService.currentUser;
+            if (currentUser == null || value != currentUser.password) {
+              return 'Current password is incorrect.';
             }
             return null;
           },
@@ -383,10 +394,14 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
             contentPadding: const EdgeInsets.symmetric(vertical: 16),
           ),
           validator: (value) {
-            if (_confirmPassController.text != _newPassController.text) {
-              return 'Password tidak cocok';
+            // PENTING: tidak ada side effect di sini. Validator hanya
+            // membandingkan, tidak pernah menulis ke variabel lain.
+            if (value == null || value.isEmpty) {
+              return 'Konfirmasi password tidak boleh kosong';
             }
-            oldPassword = _newPassController.text;
+            if (value != _newPassController.text) {
+              return 'New passwords do not match.';
+            }
             return null;
           },
         ),
@@ -402,31 +417,55 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
           height: 52,
           child: ElevatedButton(
             onPressed: () {
-              if (_formKey.currentState!.validate()) {
+              if (!_formKey.currentState!.validate()) {
+                return;
+              }
+
+              // Sumber kebenaran sebenarnya: AuthService.updatePassword.
+              // Ini yang benar-benar memverifikasi password lama terhadap
+              // AuthService.currentUser dan menulis password baru.
+              final success = AuthService.updatePassword(
+                _oldPassController.text,
+                _newPassController.text,
+              );
+
+              if (!success) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Row(
-                      children: const [
-                        Icon(Icons.check_circle_rounded, color: Colors.white),
-                        SizedBox(width: 12),
-                        Text(
-                          'Password berhasil diubah!',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
-                    ),
-                    backgroundColor: Colors.green.shade600,
+                    content: const Text('Current password is incorrect.'),
+                    backgroundColor: Colors.red.shade600,
                     behavior: SnackBarBehavior.floating,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    duration: const Duration(seconds: 2),
                   ),
                 );
-                Navigator.pop(context);
+                return;
               }
+
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Row(
+                    children: const [
+                      Icon(Icons.check_circle_rounded, color: Colors.white),
+                      SizedBox(width: 12),
+                      Text(
+                        'Password changed successfully.',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                  backgroundColor: Colors.green.shade600,
+                  behavior: SnackBarBehavior.floating,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  duration: const Duration(seconds: 2),
+                ),
+              );
+              Navigator.pop(context);
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: softPurple,

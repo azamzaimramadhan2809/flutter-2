@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:ui_ecommerce/models/cart_item.dart';
 import 'package:ui_ecommerce/models/cart_controller.dart';
+import 'package:ui_ecommerce/models/favorite_controller.dart';
 import 'package:ui_ecommerce/pages/checkout_page.dart';
 
 class ItemsPage extends StatefulWidget {
@@ -21,11 +22,14 @@ class ItemsPage extends StatefulWidget {
 
 class _ItemsPageState extends State<ItemsPage> {
   int quantity = 1;
-  bool isFavorite = false;
 
   double get price => widget.price;
 
   double get subtotal => price * quantity;
+
+  // ============================================================
+  // CATEGORY
+  // ============================================================
 
   String getCategory() {
     if (widget.productName.contains('Legion') ||
@@ -34,12 +38,31 @@ class _ItemsPageState extends State<ItemsPage> {
       return 'Laptop';
     }
 
-    if (widget.productName.contains('BMW')) {
-      return 'Cars';
+    if (widget.productName.contains('iPhone') ||
+        widget.productName.contains('Samsung') ||
+        widget.productName.contains('Xiaomi')) {
+      return 'Handphone';
+    }
+
+    if (widget.productName.contains('AirPods') ||
+        widget.productName.contains('TWS')) {
+      return 'TWS';
+    }
+
+    if (widget.productName.contains('Mouse')) {
+      return 'Mouse';
+    }
+
+    if (widget.productName.contains('Pad')) {
+      return 'Mouse Pad';
     }
 
     return 'Product';
   }
+
+  // ============================================================
+  // DESCRIPTION
+  // ============================================================
 
   String getDescription() {
     switch (widget.productName) {
@@ -61,6 +84,41 @@ class _ItemsPageState extends State<ItemsPage> {
   }
 
   // ============================================================
+  // FAVORITE
+  // ============================================================
+
+  bool get isFavorite {
+    return FavoriteController.isFavorite(widget.productName);
+  }
+
+  void toggleFavorite() {
+    setState(() {
+      if (isFavorite) {
+        FavoriteController.removeFavorite(widget.productName);
+      } else {
+        FavoriteController.addFavorite(
+          FavoriteItem(
+            name: widget.productName,
+            image: widget.imagePath,
+            price: widget.price,
+          ),
+        );
+      }
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          isFavorite
+              ? '${widget.productName} added to favorites'
+              : '${widget.productName} removed from favorites',
+        ),
+        duration: const Duration(seconds: 1),
+      ),
+    );
+  }
+
+  // ============================================================
   // ADD TO CART
   // ============================================================
 
@@ -77,7 +135,7 @@ class _ItemsPageState extends State<ItemsPage> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          '${widget.productName} × $quantity ditambahkan ke keranjang',
+          '${widget.productName} × $quantity added to cart',
         ),
         duration: const Duration(seconds: 1),
       ),
@@ -107,6 +165,10 @@ class _ItemsPageState extends State<ItemsPage> {
     );
   }
 
+  // ============================================================
+  // BUILD
+  // ============================================================
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -129,7 +191,6 @@ class _ItemsPageState extends State<ItemsPage> {
                     onPressed: () {
                       Navigator.pop(context);
                     },
-
                     icon: const Icon(
                       Icons.arrow_back,
                       size: 28,
@@ -139,75 +200,34 @@ class _ItemsPageState extends State<ItemsPage> {
 
                   const Spacer(),
 
+                  // FAVORITE BUTTON
                   Container(
                     margin: const EdgeInsets.only(right: 10),
-                    width: 45,
-                    height: 45,
-                  
                     decoration: BoxDecoration(
                       color: Colors.white,
                       shape: BoxShape.circle,
-                  
                       boxShadow: [
                         BoxShadow(
                           color: Colors.black.withOpacity(0.08),
-                          blurRadius: 10,
+                          blurRadius: 8,
                           offset: const Offset(0, 3),
                         ),
                       ],
                     ),
-                  
+
                     child: IconButton(
-                      padding: EdgeInsets.zero,
-                  
-                      onPressed: () {
-                        setState(() {
-                          isFavorite = !isFavorite;
-                        });
-                  
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              isFavorite
-                                  ? '${widget.productName} added to favorites'
-                                  : '${widget.productName} removed from favorites',
-                            ),
-                            duration: const Duration(seconds: 1),
-                            behavior: SnackBarBehavior.floating,
-                            margin: const EdgeInsets.all(16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                        );
-                      },
-                  
-                      icon: AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 250),
-                  
-                        transitionBuilder: (
-                          Widget child,
-                          Animation<double> animation,
-                        ) {
-                          return ScaleTransition(
-                            scale: animation,
-                            child: child,
-                          );
-                        },
-                  
-                        child: Icon(
-                          isFavorite
-                              ? Icons.favorite
-                              : Icons.favorite_border,
-                  
-                          key: ValueKey<bool>(isFavorite),
-                  
-                          size: 25,
-                  
-                          color: isFavorite
-                              ? Colors.red
-                              : const Color(0xFF1E3A5F),
-                        ),
+                      onPressed: toggleFavorite,
+
+                      icon: Icon(
+                        isFavorite
+                            ? Icons.favorite
+                            : Icons.favorite_border,
+
+                        size: 26,
+
+                        color: isFavorite
+                            ? Colors.red
+                            : const Color(0xFF1E3A5F),
                       ),
                     ),
                   ),
@@ -226,7 +246,10 @@ class _ItemsPageState extends State<ItemsPage> {
                       CrossAxisAlignment.start,
 
                   children: [
+                    // ==================================================
                     // PRODUCT IMAGE
+                    // ==================================================
+
                     Container(
                       height: 330,
                       width: double.infinity,
@@ -242,17 +265,39 @@ class _ItemsPageState extends State<ItemsPage> {
                           stackTrace,
                         ) {
                           return const Center(
-                            child: Icon(
-                              Icons.image_outlined,
-                              size: 70,
-                              color: Color(0xFF9CA3AF),
+                            child: Column(
+                              mainAxisAlignment:
+                                  MainAxisAlignment.center,
+
+                              children: [
+                                Icon(
+                                  Icons.image_outlined,
+                                  size: 70,
+                                  color:
+                                      Color(0xFF9CA3AF),
+                                ),
+
+                                SizedBox(height: 10),
+
+                                Text(
+                                  'Admin has not uploaded a photo yet',
+                                  style: TextStyle(
+                                    color:
+                                        Color(0xFF9CA3AF),
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ],
                             ),
                           );
                         },
                       ),
                     ),
 
+                    // ==================================================
                     // PRODUCT INFORMATION
+                    // ==================================================
+
                     Padding(
                       padding: const EdgeInsets.all(24),
 
@@ -267,8 +312,10 @@ class _ItemsPageState extends State<ItemsPage> {
 
                             style: const TextStyle(
                               fontSize: 27,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xFF1F2937),
+                              fontWeight:
+                                  FontWeight.bold,
+                              color:
+                                  Color(0xFF1F2937),
                             ),
                           ),
 
@@ -277,20 +324,50 @@ class _ItemsPageState extends State<ItemsPage> {
                           // CATEGORY + RATING
                           Row(
                             children: [
-                              Text(
-                                getCategory(),
+                              Container(
+                                padding:
+                                    const EdgeInsets
+                                        .symmetric(
+                                  horizontal: 10,
+                                  vertical: 5,
+                                ),
 
-                                style: const TextStyle(
-                                  fontSize: 15,
-                                  color: Color(0xFF6B7280),
+                                decoration:
+                                    BoxDecoration(
+                                  color:
+                                      const Color(
+                                    0xFFEFF4F8,
+                                  ),
+
+                                  borderRadius:
+                                      BorderRadius
+                                          .circular(
+                                    20,
+                                  ),
+                                ),
+
+                                child: Text(
+                                  getCategory(),
+
+                                  style:
+                                      const TextStyle(
+                                    fontSize: 13,
+                                    fontWeight:
+                                        FontWeight.w600,
+                                    color:
+                                        Color(
+                                      0xFF1E3A5F,
+                                    ),
+                                  ),
                                 ),
                               ),
 
-                              const SizedBox(width: 15),
+                              const SizedBox(width: 12),
 
                               const Icon(
                                 Icons.star,
-                                color: Color(0xFFE8B44F),
+                                color:
+                                    Color(0xFFE8B44F),
                                 size: 19,
                               ),
 
@@ -301,35 +378,43 @@ class _ItemsPageState extends State<ItemsPage> {
 
                                 style: TextStyle(
                                   fontSize: 15,
-                                  color: Color(0xFF6B7280),
+                                  color:
+                                      Color(0xFF6B7280),
                                 ),
                               ),
                             ],
                           ),
 
-                          const SizedBox(height: 15),
+                          const SizedBox(height: 18),
 
                           // PRICE
                           Text(
                             '\$${price.toStringAsFixed(2)}',
 
                             style: const TextStyle(
-                              fontSize: 21,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xFF1E3A5F),
+                              fontSize: 25,
+                              fontWeight:
+                                  FontWeight.bold,
+                              color:
+                                  Color(0xFF1E3A5F),
                             ),
                           ),
 
                           const SizedBox(height: 30),
 
+                          // ==================================================
                           // DESCRIPTION
+                          // ==================================================
+
                           const Text(
                             'Description',
 
                             style: TextStyle(
                               fontSize: 21,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xFF1F2937),
+                              fontWeight:
+                                  FontWeight.bold,
+                              color:
+                                  Color(0xFF1F2937),
                             ),
                           ),
 
@@ -341,20 +426,26 @@ class _ItemsPageState extends State<ItemsPage> {
                             style: const TextStyle(
                               fontSize: 15,
                               height: 1.6,
-                              color: Color(0xFF6B7280),
+                              color:
+                                  Color(0xFF6B7280),
                             ),
                           ),
 
                           const SizedBox(height: 30),
 
+                          // ==================================================
                           // COLOR
+                          // ==================================================
+
                           const Text(
                             'Color',
 
                             style: TextStyle(
                               fontSize: 21,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xFF1F2937),
+                              fontWeight:
+                                  FontWeight.bold,
+                              color:
+                                  Color(0xFF1F2937),
                             ),
                           ),
 
@@ -363,13 +454,14 @@ class _ItemsPageState extends State<ItemsPage> {
                           Row(
                             children: [
                               Container(
-                                width: 35,
-                                height: 35,
+                                width: 38,
+                                height: 38,
 
                                 decoration:
                                     BoxDecoration(
                                   color: Colors.black,
-                                  shape: BoxShape.circle,
+                                  shape:
+                                      BoxShape.circle,
 
                                   border: Border.all(
                                     color: Colors.white,
@@ -378,8 +470,11 @@ class _ItemsPageState extends State<ItemsPage> {
 
                                   boxShadow: [
                                     BoxShadow(
-                                      color: Colors.black
-                                          .withOpacity(0.15),
+                                      color: Colors
+                                          .black
+                                          .withOpacity(
+                                        0.15,
+                                      ),
                                       blurRadius: 5,
                                     ),
                                   ],
@@ -393,7 +488,8 @@ class _ItemsPageState extends State<ItemsPage> {
 
                                 style: TextStyle(
                                   fontSize: 16,
-                                  color: Color(0xFF374151),
+                                  color:
+                                      Color(0xFF374151),
                                 ),
                               ),
                             ],
@@ -401,14 +497,19 @@ class _ItemsPageState extends State<ItemsPage> {
 
                           const SizedBox(height: 30),
 
+                          // ==================================================
                           // QUANTITY
+                          // ==================================================
+
                           const Text(
                             'Quantity',
 
                             style: TextStyle(
                               fontSize: 21,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xFF1F2937),
+                              fontWeight:
+                                  FontWeight.bold,
+                              color:
+                                  Color(0xFF1F2937),
                             ),
                           ),
 
@@ -439,9 +540,11 @@ class _ItemsPageState extends State<ItemsPage> {
                                         const TextStyle(
                                       fontSize: 18,
                                       fontWeight:
-                                          FontWeight.w500,
+                                          FontWeight.w600,
                                       color:
-                                          Color(0xFF1F2937),
+                                          Color(
+                                        0xFF1F2937,
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -461,37 +564,71 @@ class _ItemsPageState extends State<ItemsPage> {
 
                           const SizedBox(height: 35),
 
+                          // ==================================================
                           // SUBTOTAL
-                          Row(
-                            mainAxisAlignment:
-                                MainAxisAlignment
-                                    .spaceBetween,
+                          // ==================================================
 
-                            children: [
-                              const Text(
-                                'Subtotal',
+                          Container(
+                            padding:
+                                const EdgeInsets.all(
+                              18,
+                            ),
 
-                                style: TextStyle(
-                                  fontSize: 21,
-                                  fontWeight:
-                                      FontWeight.bold,
-                                  color:
-                                      Color(0xFF1F2937),
-                                ),
+                            decoration:
+                                BoxDecoration(
+                              color: Colors.white,
+
+                              borderRadius:
+                                  BorderRadius.circular(
+                                16,
                               ),
 
-                              Text(
-                                '\$${subtotal.toStringAsFixed(2)}',
-
-                                style: const TextStyle(
-                                  fontSize: 20,
-                                  fontWeight:
-                                      FontWeight.bold,
-                                  color:
-                                      Color(0xFF1E3A5F),
+                              border:
+                                  Border.all(
+                                color:
+                                    const Color(
+                                  0xFFE5E7EB,
                                 ),
                               ),
-                            ],
+                            ),
+
+                            child: Row(
+                              mainAxisAlignment:
+                                  MainAxisAlignment
+                                      .spaceBetween,
+
+                              children: [
+                                const Text(
+                                  'Subtotal',
+
+                                  style:
+                                      TextStyle(
+                                    fontSize: 18,
+                                    fontWeight:
+                                        FontWeight.bold,
+                                    color:
+                                        Color(
+                                      0xFF1F2937,
+                                    ),
+                                  ),
+                                ),
+
+                                Text(
+                                  '\$${subtotal.toStringAsFixed(2)}',
+
+                                  style:
+                                      const TextStyle(
+                                    fontSize: 20,
+                                    fontWeight:
+                                        FontWeight.bold,
+                                    color:
+                                        Color(
+                                      0xFF1E3A5F,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
 
                           const SizedBox(height: 35),
@@ -515,7 +652,18 @@ class _ItemsPageState extends State<ItemsPage> {
                 20,
               ),
 
-              color: const Color(0xFFF7F8FA),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF7F8FA),
+
+                boxShadow: [
+                  BoxShadow(
+                    color:
+                        Colors.black.withOpacity(0.06),
+                    blurRadius: 10,
+                    offset: const Offset(0, -3),
+                  ),
+                ],
+              ),
 
               child: Row(
                 children: [
@@ -538,10 +686,14 @@ class _ItemsPageState extends State<ItemsPage> {
                         style:
                             OutlinedButton.styleFrom(
                           foregroundColor:
-                              const Color(0xFF1E3A5F),
+                              const Color(
+                            0xFF1E3A5F,
+                          ),
 
-                          side: const BorderSide(
-                            color: Color(0xFF1E3A5F),
+                          side:
+                              const BorderSide(
+                            color:
+                                Color(0xFF1E3A5F),
                             width: 1.5,
                           ),
 
@@ -559,7 +711,7 @@ class _ItemsPageState extends State<ItemsPage> {
 
                   const SizedBox(width: 12),
 
-                  // BUY NOW
+                  // CHECKOUT
                   Expanded(
                     child: SizedBox(
                       height: 55,
@@ -570,7 +722,9 @@ class _ItemsPageState extends State<ItemsPage> {
                         style:
                             ElevatedButton.styleFrom(
                           backgroundColor:
-                              const Color(0xFF1E3A5F),
+                              const Color(
+                            0xFF1E3A5F,
+                          ),
 
                           foregroundColor:
                               Colors.white,

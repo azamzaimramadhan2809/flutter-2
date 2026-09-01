@@ -3,6 +3,7 @@ import 'package:ui_ecommerce/pages/account_page.dart';
 import 'package:ui_ecommerce/pages/cart_page.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:ui_ecommerce/ui/widget/CategoriesWidget.dart';
+import 'package:ui_ecommerce/pages/favorite_page.dart';
 import 'package:ui_ecommerce/ui/widget/ItemWidget.dart';
 import 'package:ui_ecommerce/ui/widget/HomeAppBar.dart';
 
@@ -82,7 +83,6 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-
 // ============================================================
 // HOME PAGE CONTENT
 // ============================================================
@@ -91,13 +91,10 @@ class HomePageContent extends StatefulWidget {
   const HomePageContent({super.key});
 
   @override
-  State<HomePageContent> createState() =>
-      _HomePageContentState();
+  State<HomePageContent> createState() => _HomePageContentState();
 }
 
-class _HomePageContentState
-    extends State<HomePageContent> {
-
+class _HomePageContentState extends State<HomePageContent> {
   // ============================================================
   // CATEGORY
   // ============================================================
@@ -145,6 +142,22 @@ class _HomePageContentState
   }
 
   // ============================================================
+  // OPEN FAVORITE PAGE
+  // ============================================================
+
+  void _openFavoritePage() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const FavoritePage(),
+      ),
+    ).then((_) {
+      // Refresh Home setelah kembali dari Favorite Page
+      setState(() {});
+    });
+  }
+
+  // ============================================================
   // BUILD
   // ============================================================
 
@@ -172,98 +185,149 @@ class _HomePageContentState
             children: [
 
               // ==================================================
-              // SEARCH BAR
+              // SEARCH + FAVORITE
               // ==================================================
 
-              Container(
-                margin: const EdgeInsets.symmetric(
-                  horizontal: 15,
-                ),
-
+              Padding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 15,
-                ),
-
-                height: 50,
-
-                decoration: BoxDecoration(
-                  color: Colors.white,
-
-                  borderRadius:
-                      BorderRadius.circular(30),
                 ),
 
                 child: Row(
                   children: [
 
-                    // SEARCH ICON
-                    const Icon(
-                      Icons.search,
-                      color: Color(0xFF6B7280),
-                      size: 23,
-                    ),
+                    // ==========================================
+                    // SEARCH BAR
+                    // ==========================================
 
-                    const SizedBox(
-                      width: 8,
-                    ),
-
-                    // TEXT FIELD
                     Expanded(
-                      child: TextFormField(
-                        controller:
-                            _searchController,
+                      child: Container(
+                        padding:
+                            const EdgeInsets.symmetric(
+                          horizontal: 15,
+                        ),
 
-                        textInputAction:
-                            TextInputAction.search,
+                        height: 50,
 
-                        onFieldSubmitted: (_) {
-                          _refreshSearch();
-                        },
+                        decoration: BoxDecoration(
+                          color: Colors.white,
 
-                        decoration:
-                            const InputDecoration(
-                          border: InputBorder.none,
+                          borderRadius:
+                              BorderRadius.circular(30),
+                        ),
 
-                          hintText:
-                              'Search here...',
+                        child: Row(
+                          children: [
 
-                          hintStyle:
-                              TextStyle(
-                            color:
-                                Color(0xFF9CA3AF),
-                          ),
+                            const Icon(
+                              Icons.search,
+                              color: Color(0xFF6B7280),
+                              size: 23,
+                            ),
+
+                            const SizedBox(
+                              width: 8,
+                            ),
+
+                            Expanded(
+                              child: TextFormField(
+                                controller:
+                                    _searchController,
+
+                                textInputAction:
+                                    TextInputAction.search,
+
+                                onFieldSubmitted: (_) {
+                                  _refreshSearch();
+                                },
+
+                                decoration:
+                                    const InputDecoration(
+                                  border: InputBorder.none,
+
+                                  hintText:
+                                      'Search here...',
+
+                                  hintStyle:
+                                      TextStyle(
+                                    color:
+                                        Color(0xFF9CA3AF),
+                                  ),
+                                ),
+                              ),
+                            ),
+
+                            // SEARCH BUTTON
+                            InkWell(
+                              borderRadius:
+                                  BorderRadius.circular(20),
+
+                              onTap: _refreshSearch,
+
+                              child: Container(
+                                width: 38,
+                                height: 38,
+
+                                decoration:
+                                    const BoxDecoration(
+                                  color:
+                                      Color(0xFF1E3A5F),
+
+                                  shape:
+                                      BoxShape.circle,
+                                ),
+
+                                child: const Icon(
+                                  Icons.search,
+                                  color: Colors.white,
+                                  size: 20,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
 
-                    // REFRESH / SEARCH BUTTON
-                    InkWell(
-                      borderRadius:
-                          BorderRadius.circular(20),
+                    const SizedBox(width: 10),
 
-                      onTap: _refreshSearch,
+                    // ==========================================
+                    // FAVORITE BUTTON
+                    // ==========================================
+
+                    InkWell(
+                      onTap: _openFavoritePage,
+
+                      borderRadius:
+                          BorderRadius.circular(16),
 
                       child: Container(
-                        width: 38,
-                        height: 38,
+                        width: 50,
+                        height: 50,
 
-                        decoration:
-                            BoxDecoration(
-                          color:
-                              const Color(
-                            0xFF1E3A5F,
-                          ),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
 
-                          shape:
-                              BoxShape.circle,
+                          borderRadius:
+                              BorderRadius.circular(16),
+
+                          boxShadow: [
+                            BoxShadow(
+                              color:
+                                  Colors.black.withOpacity(0.08),
+
+                              blurRadius: 8,
+
+                              offset:
+                                  const Offset(0, 3),
+                            ),
+                          ],
                         ),
 
-                        child:
-                            const Icon(
-                          Icons.search,
-                          color:
-                              Colors.white,
-                          size: 20,
+                        child: const Icon(
+                          Icons.favorite_border,
+                          color: Colors.red,
+                          size: 27,
                         ),
                       ),
                     ),
@@ -276,8 +340,7 @@ class _HomePageContentState
               // ==================================================
 
               Container(
-                alignment:
-                    Alignment.centerLeft,
+                alignment: Alignment.centerLeft,
 
                 margin:
                     const EdgeInsets.symmetric(
@@ -290,10 +353,7 @@ class _HomePageContentState
 
                   style: TextStyle(
                     fontSize: 25,
-
-                    fontWeight:
-                        FontWeight.bold,
-
+                    fontWeight: FontWeight.bold,
                     color: Colors.white,
                   ),
                 ),
@@ -321,8 +381,7 @@ class _HomePageContentState
               // ==================================================
 
               Container(
-                alignment:
-                    Alignment.centerLeft,
+                alignment: Alignment.centerLeft,
 
                 margin:
                     const EdgeInsets.symmetric(
@@ -335,13 +394,9 @@ class _HomePageContentState
                       ? 'Best Item'
                       : selectedCategory,
 
-                  style:
-                      const TextStyle(
+                  style: const TextStyle(
                     fontSize: 25,
-
-                    fontWeight:
-                        FontWeight.bold,
-
+                    fontWeight: FontWeight.bold,
                     color: Colors.white,
                   ),
                 ),
